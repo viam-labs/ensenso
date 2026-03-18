@@ -1,0 +1,13 @@
+{
+  "module_id": "viam:camera:ensenso",
+  "visibility": "private",
+  "url": "https://github.com/yourusername/viam-camera-ensenso",
+  "description": "Viam module for IDS Ensenso 3D stereo cameras",
+  "models": [
+    {
+      "api": "rdk:component:camera",
+      "model": "viam:camera:ensenso"
+    }
+  ],
+  "entrypoint": "bin/viam-camera-ensenso"
+}

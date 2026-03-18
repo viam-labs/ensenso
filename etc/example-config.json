@@ -1,0 +1,24 @@
+{
+  "components": [
+    {
+      "name": "ensenso",
+      "namespace": "rdk",
+      "type": "camera",
+      "model": "viam:camera:ensenso",
+      "attributes": {
+        "serial_number": "",
+        "width_px": 1280,
+        "height_px": 1024,
+        "enable_depth": true,
+        "enable_point_cloud": true
+      }
+    }
+  ],
+  "modules": [
+    {
+      "type": "local",
+      "name": "viam-camera-ensenso",
+      "executable_path": "/path/to/viam-camera-ensenso/bin/viam-camera-ensenso"
+    }
+  ]
+}

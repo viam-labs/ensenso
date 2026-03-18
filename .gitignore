@@ -1,0 +1,33 @@
+# Build directories
+build/
+bin/
+*.tar.gz
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# C++ compiled files
+*.o
+*.so
+*.a
+*.dylib
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Conan
+conan_toolchain.cmake
+conanbuildinfo.cmake
+conaninfo.txt
+
+# Generated files
+viam-camera-ensenso
+module.tar.gz
