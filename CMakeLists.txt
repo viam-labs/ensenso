@@ -1,26 +1,25 @@
-cmake_minimum_required(VERSION 3.20)
-project(viam-camera-ensenso VERSION 0.1.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.25 FATAL_ERROR)
+set(CMAKE_PROJECT_VERSION 0.1.0)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(viam-camera-ensenso
+    DESCRIPTION "Viam Module for IDS Ensenso 3D Cameras"
+    HOMEPAGE_URL https://github.com/yourusername/viam-camera-ensenso
+    LANGUAGES CXX
+)
 
-# Set default build type to Release
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+option(VIAM_ENSENSO_ENABLE_TESTS "Enable unit tests" OFF)
+
+# Set RPATH for runtime library finding
+if (APPLE)
+    list(PREPEND CMAKE_INSTALL_RPATH "@loader_path/../lib")
+else()
+    list(PREPEND CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 endif()
 
-# Compiler flags
-add_compile_options(-Wall -Wextra -Wpedantic)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
-# Check if building with Conan
-if(EXISTS "${CMAKE_BINARY_DIR}/conan_toolchain.cmake")
-    message(STATUS "Building with Conan dependencies")
-    include("${CMAKE_BINARY_DIR}/conan_toolchain.cmake")
-endif()
-
-# Find Viam SDK (optional for now - can build test without it)
+# Try to find Viam SDK (may not be available without Conan)
 find_package(viam-cpp-sdk QUIET)
 if(viam-cpp-sdk_FOUND)
     set(BUILD_VIAM_MODULE ON)
@@ -28,7 +27,7 @@ if(viam-cpp-sdk_FOUND)
 else()
     set(BUILD_VIAM_MODULE OFF)
     message(STATUS "Viam C++ SDK not found - will only build test utilities")
-    message(STATUS "To build the full module, run: make conan-install")
+    message(STATUS "To build the full module, run: conan install . --build=missing")
 endif()
 
 # Ensenso SDK
@@ -59,47 +58,32 @@ message(STATUS "Ensenso library: ${ENSENSO_LIBRARY}")
 
 # Only build the full Viam module if SDK is available
 if(BUILD_VIAM_MODULE)
-    # Source files
-    set(SOURCES
+    # Create executable
+    add_executable(${PROJECT_NAME}
         src/module/main.cpp
         src/module/ensenso_camera.cpp
     )
 
-    set(HEADERS
-        src/module/ensenso_camera.hpp
-    )
-
-    # Create executable
-    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
     # Include directories
-    target_include_directories(${PROJECT_NAME} PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/module
-        ${ENSENSO_INCLUDE_DIR}
+    target_include_directories(${PROJECT_NAME}
+        PRIVATE src/module
+        PRIVATE ${ENSENSO_INCLUDE_DIR}
     )
+
+    # Compile features
+    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
     # Link libraries
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-        viam-cpp-sdk::viamsdk
-        ${ENSENSO_LIBRARY}
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+            viam-cpp-sdk::viamsdk
+            ${ENSENSO_LIBRARY}
+            ${CMAKE_DL_LIBS}
     )
 
-    # Set RPATH for finding shared libraries at runtime
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        INSTALL_RPATH "${ENSENSO_LIB_DIR}"
-        BUILD_WITH_INSTALL_RPATH TRUE
-    )
-
-    # Installation
-    install(TARGETS ${PROJECT_NAME}
-        RUNTIME DESTINATION bin
-    )
-
-    # Install metadata
-    install(FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/etc/meta.json
-        DESTINATION etc
-    )
+    # Installation (to root for Conan deploy)
+    install(TARGETS ${PROJECT_NAME} DESTINATION .)
+    install(FILES etc/meta.json DESTINATION .)
 endif()
 
 # Test executable (optional - for testing SDK integration)
