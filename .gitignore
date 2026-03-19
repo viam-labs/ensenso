@@ -1,7 +1,7 @@
 # Build directories
 build/
 build-conan/
-bin/
+bin/viam-camera-ensenso
 
 # Python / Conan venv
 venv/
@@ -33,3 +33,4 @@ conaninfo.txt
 
 # Build outputs
 module.tar.gz
+wget-log
