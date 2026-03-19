@@ -7,7 +7,11 @@
     {
       "api": "rdk:component:camera",
       "model": "viam:camera:ensenso"
+    },
+    {
+      "api": "rdk:service:discovery",
+      "model": "viam:ensenso:discovery"
     }
   ],
-  "entrypoint": "bin/viam-camera-ensenso"
+  "entrypoint": "viam-camera-ensenso"
 }

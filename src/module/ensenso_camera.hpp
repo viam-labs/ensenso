@@ -20,6 +20,9 @@ namespace viam {
 namespace camera {
 namespace ensenso {
 
+// Forward declaration
+class NxLibContext;
+
 /**
  * @brief Viam Camera component implementation for IDS Ensenso cameras
  *
@@ -102,9 +105,9 @@ private:
     bool enable_point_cloud_;
 
     // nxLib objects
+    std::shared_ptr<NxLibContext> nxlib_context_;  // Shared nxLib context
     NxLibItem camera_node_;
     bool camera_open_;
-    bool owns_nxlib_;  // Track if this instance initialized nxLib
 
     // Private methods
     void open_camera();

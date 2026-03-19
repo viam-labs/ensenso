@@ -62,6 +62,7 @@ if(BUILD_VIAM_MODULE)
     add_executable(${PROJECT_NAME}
         src/module/main.cpp
         src/module/ensenso_camera.cpp
+        src/module/nxlib_context.cpp
     )
 
     # Include directories

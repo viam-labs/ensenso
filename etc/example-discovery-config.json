@@ -1,0 +1,6 @@
+{
+  "name": "ensenso-discovery",
+  "type": "discovery",
+  "model": "viam:ensenso:discovery",
+  "attributes": {}
+}

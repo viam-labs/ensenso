@@ -33,6 +33,22 @@ make clean          # Remove all build artifacts
 
 ## Robot Configuration
 
+### Discovery Service (Recommended)
+
+The module includes automatic camera discovery. Add this to your robot config:
+
+```json
+{
+  "name": "ensenso-discovery",
+  "type": "discovery",
+  "model": "viam:ensenso:discovery"
+}
+```
+
+The discovery service will automatically detect all connected Ensenso cameras and suggest configurations.
+
+### Manual Camera Configuration
+
 Use `etc/example-config.json` as a template:
 
 ```json
@@ -55,9 +71,10 @@ Use `etc/example-config.json` as a template:
 ```
 ensenso/
 ├── src/module/           # Main implementation
-│   ├── ensenso_camera.hpp
+│   ├── ensenso_camera.hpp   # Camera component
 │   ├── ensenso_camera.cpp
-│   └── main.cpp
+│   ├── discovery.hpp        # Discovery service
+│   └── main.cpp             # Module entry point
 ├── src/test/             # Tests
 ├── etc/                  # Configuration files
 ├── CMakeLists.txt        # Build configuration
