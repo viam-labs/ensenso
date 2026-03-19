@@ -258,18 +258,32 @@ void EnsensoCamera::capture_images() {
     VIAM_RESOURCE_LOG(debug) << "[capture_images] Starting image capture for camera: " << serial_number_;
     try {
         NxLibCommand capture(cmdCapture);
-        capture.parameters()[itmCameras] = serial_number_;
+        if (!color_serial_.empty()) {
+            capture.parameters()[itmCameras][0] = serial_number_;
+            capture.parameters()[itmCameras][1] = color_serial_;
+        } else {
+            capture.parameters()[itmCameras] = serial_number_;
+        }
         VIAM_RESOURCE_LOG(debug) << "[capture_images] Executing cmdCapture";
         capture.execute();
         VIAM_RESOURCE_LOG(debug) << "[capture_images] Capture complete";
 
-        // Monocular cameras don't support stereo rectification
+        // Rectify stereo camera images
         if (camera_type_ == "Stereo") {
-            VIAM_RESOURCE_LOG(debug) << "[capture_images] Executing cmdRectifyImages";
+            VIAM_RESOURCE_LOG(debug) << "[capture_images] Executing cmdRectifyImages (stereo)";
             NxLibCommand rectify(cmdRectifyImages);
             rectify.parameters()[itmCameras] = serial_number_;
             rectify.execute();
-            VIAM_RESOURCE_LOG(debug) << "[capture_images] Rectification complete";
+            VIAM_RESOURCE_LOG(debug) << "[capture_images] Stereo rectification complete";
+
+            // Also rectify the linked color camera to remove fisheye distortion
+            if (!color_serial_.empty()) {
+                VIAM_RESOURCE_LOG(debug) << "[capture_images] Executing cmdRectifyImages (color)";
+                NxLibCommand rectify_color(cmdRectifyImages);
+                rectify_color.parameters()[itmCameras] = color_serial_;
+                rectify_color.execute();
+                VIAM_RESOURCE_LOG(debug) << "[capture_images] Color rectification complete";
+            }
         }
     } catch (const NxLibException& ex) {
         VIAM_RESOURCE_LOG(error) << "[capture_images] nxLib exception: " << ex.getErrorText();
@@ -331,7 +345,16 @@ Camera::raw_image EnsensoCamera::get_color_image(const std::string& mime_type) {
         // Stereo cameras: prefer rectified left image, fall back to raw left.
         // Monocular cameras: image is stored directly at Raw (no Left/Right children).
         NxLibItem leftImg;
-        if (camera_type_ == "Stereo") {
+        if (camera_type_ == "Stereo" && !color_serial_.empty()) {
+            // Use linked color camera's rectified image (removes fisheye distortion)
+            VIAM_RESOURCE_LOG(debug) << "[get_color_image] Reading from color camera: " << color_serial_;
+            NxLibItem color_node = NxLibItem()[itmCameras][itmBySerialNo][color_serial_];
+            leftImg = color_node[itmImages][itmRectified];
+            if (!leftImg.exists()) {
+                VIAM_RESOURCE_LOG(warn) << "[get_color_image] Color rectified not found, falling back to raw";
+                leftImg = color_node[itmImages][itmRaw];
+            }
+        } else if (camera_type_ == "Stereo") {
             leftImg = camera_node_[itmImages][itmRectified][itmLeft];
             if (!leftImg.exists()) {
                 VIAM_RESOURCE_LOG(warn) << "[get_color_image] Rectified/Left not found, trying Raw/Left";
