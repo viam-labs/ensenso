@@ -33,7 +33,7 @@ public:
         : Discovery(configuration.name()) {
         // Get shared nxLib context (initializes nxLib if needed)
         try {
-            nxlib_context_ = NxLibContext::get_instance(true);
+            nxlib_context_ = NxLibContext::get_instance(false);
         } catch (const std::exception& ex) {
             VIAM_SDK_LOG(error) << "Failed to initialize nxLib: " << ex.what();
             throw;
