@@ -5,7 +5,7 @@ namespace camera {
 namespace ensenso {
 
 // Static member definitions
-std::shared_ptr<NxLibContext> NxLibContext::instance_ = nullptr;
+std::weak_ptr<NxLibContext> NxLibContext::instance_;
 std::mutex NxLibContext::mutex_;
 
 }  // namespace ensenso

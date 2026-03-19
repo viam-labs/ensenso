@@ -24,11 +24,13 @@ public:
     static std::shared_ptr<NxLibContext> get_instance(bool wait_for_cameras = true) {
         std::lock_guard<std::mutex> lock(mutex_);
 
-        if (!instance_) {
-            instance_ = std::shared_ptr<NxLibContext>(new NxLibContext(wait_for_cameras));
+        auto inst = instance_.lock();
+        if (!inst) {
+            inst = std::shared_ptr<NxLibContext>(new NxLibContext(wait_for_cameras));
+            instance_ = inst;
         }
 
-        return instance_;
+        return inst;
     }
 
     /**
@@ -69,7 +71,7 @@ private:
     NxLibContext& operator=(const NxLibContext&) = delete;
 
     bool initialized_;
-    static std::shared_ptr<NxLibContext> instance_;
+    static std::weak_ptr<NxLibContext> instance_;
     static std::mutex mutex_;
 };
 

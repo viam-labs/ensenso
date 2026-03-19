@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -99,15 +100,19 @@ public:
 private:
     // Configuration attributes
     std::string serial_number_;
+    std::string camera_type_;   // "Stereo" or "Monocular"
+    std::string color_serial_;  // Serial of linked color camera, empty if none
     int width_px_;
     int height_px_;
     bool enable_depth_;
     bool enable_point_cloud_;
+    int point_cloud_stride_;  // Downsample: take every Nth pixel (1=full, 2=quarter points)
 
     // nxLib objects
     std::shared_ptr<NxLibContext> nxlib_context_;  // Shared nxLib context
     NxLibItem camera_node_;
     bool camera_open_;
+    std::mutex camera_mutex_;  // Serializes all nxLib camera operations
 
     // Private methods
     void open_camera();

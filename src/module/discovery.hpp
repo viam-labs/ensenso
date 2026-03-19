@@ -89,13 +89,17 @@ public:
                         model_name = camera[itmModelName].asString();
                     }
 
+                    // Only stereo cameras can produce depth and point clouds
+                    bool is_stereo = (camera_type == "Stereo");
+
                     // Set attributes with camera-specific configuration
                     viam::sdk::ProtoStruct attributes;
                     attributes["serial_number"] = serial;
                     attributes["width_px"] = 1280.0;  // Default resolution
                     attributes["height_px"] = 1024.0;
-                    attributes["enable_depth"] = true;
-                    attributes["enable_point_cloud"] = true;
+                    attributes["camera_type"] = camera_type;
+                    attributes["enable_depth"] = is_stereo;
+                    attributes["enable_point_cloud"] = is_stereo;
 
                     // Add optional camera info
                     if (camera[itmVersion].exists()) {

@@ -58,6 +58,8 @@ message(STATUS "Ensenso library: ${ENSENSO_LIBRARY}")
 
 # Only build the full Viam module if SDK is available
 if(BUILD_VIAM_MODULE)
+    find_package(stb REQUIRED)
+
     # Create executable
     add_executable(${PROJECT_NAME}
         src/module/main.cpp
@@ -80,6 +82,7 @@ if(BUILD_VIAM_MODULE)
             viam-cpp-sdk::viamsdk
             ${ENSENSO_LIBRARY}
             ${CMAKE_DL_LIBS}
+            stb::stb
     )
 
     # Installation (to root for Conan deploy)
