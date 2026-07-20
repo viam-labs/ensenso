@@ -60,7 +60,7 @@ public:
 
             // Get list of cameras
             NxLibItem root;
-            NxLibItem cameras = root[itmCameras][itmBySerialNo];
+            NxLibItem cameras = root[itmCameras];
 
             int camera_count = cameras.count();
             VIAM_SDK_LOG(info) << "[discover_resources] Found " << camera_count << " Ensenso camera(s)";
