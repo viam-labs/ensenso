@@ -134,10 +134,10 @@ void EnsensoCamera::open_camera() {
         // Poll until the requested camera appears (up to 30s).
         constexpr int max_wait_s = 30;
         constexpr int poll_interval_ms = 500;
-        NxLibItem cameras = NxLibItem()[itmCameras][itmBySerialNo];
+        NxLibItem cameras = NxLibItem()[itmCameras];
 
         for (int waited_ms = 0; ; waited_ms += poll_interval_ms) {
-            cameras = NxLibItem()[itmCameras][itmBySerialNo];
+            cameras = NxLibItem()[itmCameras];
             int count = cameras.count();
 
             bool found = !serial_number_.empty()
@@ -199,7 +199,7 @@ void EnsensoCamera::open_camera() {
         // Try to open linked color camera for texture (XYZRGB point clouds)
         if (camera_type_ == "Stereo") {
             std::string potential_color = serial_number_ + "-Color";
-            NxLibItem all_cameras = NxLibItem()[itmCameras][itmBySerialNo];
+            NxLibItem all_cameras = NxLibItem()[itmCameras];
             if (all_cameras[potential_color].exists()) {
                 VIAM_RESOURCE_LOG(info) << "[open_camera] Found linked color camera: " << potential_color;
                 try {
@@ -348,7 +348,7 @@ Camera::raw_image EnsensoCamera::get_color_image(const std::string& mime_type) {
         if (camera_type_ == "Stereo" && !color_serial_.empty()) {
             // Use linked color camera's rectified image (removes fisheye distortion)
             VIAM_RESOURCE_LOG(debug) << "[get_color_image] Reading from color camera: " << color_serial_;
-            NxLibItem color_node = NxLibItem()[itmCameras][itmBySerialNo][color_serial_];
+            NxLibItem color_node = NxLibItem()[itmCameras][color_serial_];
             leftImg = color_node[itmImages][itmRectified];
             if (!leftImg.exists()) {
                 VIAM_RESOURCE_LOG(warn) << "[get_color_image] Color rectified not found, falling back to raw";
