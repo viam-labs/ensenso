@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      # Configure as repository Actions variables (Settings →
+      # Secrets and variables → Actions → Variables).
+      # ENSENSO_SDK_VERSION: e.g. "4.3.1037"
+      # ENSENSO_SDK_URL:     base URL where the .deb lives (must be publicly fetchable)
+      ENSENSO_SDK_VERSION: ${{ vars.ENSENSO_SDK_VERSION }}
+      ENSENSO_SDK_URL: ${{ vars.ENSENSO_SDK_URL }}
+    steps:
+      # actions/checkout@v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Check required variables
+        run: |
+          if [[ -z "$ENSENSO_SDK_VERSION" ]]; then
+            echo "::error::Missing repository Actions variable: ENSENSO_SDK_VERSION"
+            echo "Configure it under Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+          if [[ -z "$ENSENSO_SDK_URL" ]]; then
+            echo "::error::Missing repository Actions variable: ENSENSO_SDK_URL"
+            echo "Configure it under Settings → Secrets and variables → Actions → Variables."
+            exit 1
+          fi
+
+      - name: Install Ensenso SDK
+        run: |
+          ENSENSO_DEB="ensenso-sdk-${ENSENSO_SDK_VERSION}-x64.deb"
+          curl --fail --silent --show-error --location \
+            "${ENSENSO_SDK_URL%/}/${ENSENSO_DEB}" \
+            -o "${ENSENSO_DEB}"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends "./${ENSENSO_DEB}"
+
+      - name: Setup
+        run: make setup
+
+      - name: Build module.tar.gz
+        run: make module.tar.gz
+
+      - name: Verify build artifact
+        run: |
+          test -f module.tar.gz
+          tar tzf module.tar.gz | sort
