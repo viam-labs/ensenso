@@ -687,7 +687,7 @@ Camera::point_cloud EnsensoCamera::get_point_cloud(std::string mime_type, const 
 Camera::properties EnsensoCamera::get_properties() {
     std::lock_guard<std::mutex> lock(camera_mutex_);
     VIAM_RESOURCE_LOG(debug) << "[get_properties] Retrieving camera properties";
-    Camera::properties props;
+    Camera::properties props{};
     props.supports_pcd = enable_point_cloud_;
     props.intrinsic_parameters.width_px = width_px_;
     props.intrinsic_parameters.height_px = height_px_;
