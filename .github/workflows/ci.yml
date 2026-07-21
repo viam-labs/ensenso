@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      # Current versions: https://community.ensenso.com/t/ensenso-sdk-downloads/58
+      ENSENSO_SDK_VERSION: ${{ vars.ENSENSO_SDK_VERSION }}
+    steps:
+      # actions/checkout@v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Check required variables
+        run: |
+          if [[ -z "$ENSENSO_SDK_VERSION" ]]; then
+            echo "::error::Missing repository Actions variable: ENSENSO_SDK_VERSION"
+            exit 1
+          fi
+
+      - name: Install Ensenso SDK
+        run: |
+          ENSENSO_DEB="ensenso-sdk-${ENSENSO_SDK_VERSION}-x64.deb"
+          curl --fail --silent --show-error --location \
+            "https://download.optonic.com/s/ensensosdk/download?files=${ENSENSO_DEB}" \
+            -o "${ENSENSO_DEB}"
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends "./${ENSENSO_DEB}"
+
+      # Skips the ~20min Conan rebuild of viam-cpp-sdk on cache hit.
+      # Pin to a full SHA if supply-chain hygiene requires it.
+      - name: Cache Conan packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ runner.os }}-${{ hashFiles('conanfile.py') }}
+          restore-keys: |
+            conan-${{ runner.os }}-
+
+      - name: Setup
+        run: make setup
+
+      - name: Build module.tar.gz
+        run: make module.tar.gz
+
+      - name: Verify build artifact
+        run: |
+          test -f module.tar.gz
+          tar tzf module.tar.gz | sort
