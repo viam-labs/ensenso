@@ -691,6 +691,9 @@ Camera::properties EnsensoCamera::get_properties() {
     props.supports_pcd = enable_point_cloud_;
     props.intrinsic_parameters.width_px = width_px_;
     props.intrinsic_parameters.height_px = height_px_;
+    // Diagnostic: report a low positive framerate to test whether the WebRTC
+    // pipeline renders low-fps streams correctly. See RDK PR discussion.
+    props.frame_rate = 5.f;
 
     try {
         // Get camera calibration parameters
