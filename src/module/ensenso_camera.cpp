@@ -691,29 +691,27 @@ Camera::properties EnsensoCamera::get_properties() {
     props.supports_pcd = enable_point_cloud_;
     props.intrinsic_parameters.width_px = width_px_;
     props.intrinsic_parameters.height_px = height_px_;
+    // On-demand capture; no fixed frame rate.
+    props.frame_rate = 0.f;
 
-    try {
-        // Get camera calibration parameters
-        VIAM_RESOURCE_LOG(debug) << "[get_properties] Retrieving calibration parameters";
-        NxLibItem calib = camera_node_[itmCalibration][itmMonocular][itmLeft];
+    // Let NxLibException propagate on failure. A silent fallback to zero
+    // intrinsics would cause downstream consumers (motion, vision, cartographer)
+    // to divide by zero and produce garbage.
+    NxLibItem calib = camera_node_[itmCalibration][itmMonocular][itmLeft];
+    double fx = calib[itmCamera][0][0].asDouble();
+    double fy = calib[itmCamera][1][1].asDouble();
+    double cx = calib[itmCamera][0][2].asDouble();
+    double cy = calib[itmCamera][1][2].asDouble();
 
-        double fx = calib[itmCamera][0][0].asDouble();
-        double fy = calib[itmCamera][1][1].asDouble();
-        double cx = calib[itmCamera][0][2].asDouble();
-        double cy = calib[itmCamera][1][2].asDouble();
+    props.intrinsic_parameters.focal_x_px = fx;
+    props.intrinsic_parameters.focal_y_px = fy;
+    props.intrinsic_parameters.center_x_px = cx;
+    props.intrinsic_parameters.center_y_px = cy;
 
-        props.intrinsic_parameters.focal_x_px = fx;
-        props.intrinsic_parameters.focal_y_px = fy;
-        props.intrinsic_parameters.center_x_px = cx;
-        props.intrinsic_parameters.center_y_px = cy;
-
-        VIAM_RESOURCE_LOG(info) << "[get_properties] Calibration: fx=" << fx << ", fy=" << fy << ", cx=" << cx << ", cy=" << cy;
-
-    } catch (const NxLibException& ex) {
-        VIAM_RESOURCE_LOG(warn) << "[get_properties] Calibration not available, using defaults: " << ex.getErrorText();
-    }
-
-    VIAM_RESOURCE_LOG(info) << "[get_properties] Properties: " << width_px_ << "x" << height_px_ << ", supports_pcd=" << props.supports_pcd;
+    VIAM_RESOURCE_LOG(info) << "[get_properties] fx=" << fx << " fy=" << fy
+                            << " cx=" << cx << " cy=" << cy
+                            << " " << width_px_ << "x" << height_px_
+                            << " supports_pcd=" << props.supports_pcd;
     return props;
 }
 
