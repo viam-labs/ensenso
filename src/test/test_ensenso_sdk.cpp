@@ -10,8 +10,7 @@
 
 int main() {
     std::cout << "Testing Ensenso SDK integration..." << std::endl;
-    std::cout << "NxLib version: " << NXLIB_VERSION_MAJOR << "."
-              << NXLIB_VERSION_MINOR << "." << NXLIB_VERSION_BUILD << std::endl;
+    std::cout << "NxLib version: " << NXLIB_VERSION_MAJOR << "." << NXLIB_VERSION_MINOR << "." << NXLIB_VERSION_BUILD << std::endl;
 
     try {
         // Initialize nxLib
@@ -37,17 +36,11 @@ int main() {
                 const std::string& serial = serials[i];
                 NxLibItem camera = cameras[serial];
 
-                std::string type = camera[itmType].exists()
-                    ? camera[itmType].asString()
-                    : "Unknown";
+                std::string type = camera[itmType].exists() ? camera[itmType].asString() : "Unknown";
 
-                std::string model = camera[itmModelName].exists()
-                    ? camera[itmModelName].asString()
-                    : "Unknown";
+                std::string model = camera[itmModelName].exists() ? camera[itmModelName].asString() : "Unknown";
 
-                std::cout << "  [" << i << "] Serial: " << serial
-                          << ", Type: " << type
-                          << ", Model: " << model << std::endl;
+                std::cout << "  [" << i << "] Serial: " << serial << ", Type: " << type << ", Model: " << model << std::endl;
             }
         } else {
             std::cout << "\n⚠ No cameras detected. Please connect an Ensenso camera." << std::endl;
@@ -62,8 +55,7 @@ int main() {
         return 0;
 
     } catch (const NxLibException& ex) {
-        std::cerr << "❌ NxLib error " << ex.getErrorCode() << ": "
-                  << ex.getErrorText() << std::endl;
+        std::cerr << "❌ NxLib error " << ex.getErrorCode() << ": " << ex.getErrorText() << std::endl;
         return 1;
     } catch (const std::exception& ex) {
         std::cerr << "❌ Error: " << ex.what() << std::endl;

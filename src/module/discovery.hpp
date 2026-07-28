@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include <viam/sdk/services/discovery.hpp>
-#include <viam/sdk/resource/resource.hpp>
 #include <viam/sdk/config/resource.hpp>
+#include <viam/sdk/resource/resource.hpp>
+#include <viam/sdk/services/discovery.hpp>
 
 #include "nxLib.h"
 #include "nxlib_context.hpp"
@@ -26,11 +26,10 @@ namespace discovery {
  * configuration suggestions for the Viam robot.
  */
 class EnsensoDiscovery : public Discovery {
-public:
+   public:
     static inline viam::sdk::Model model{"viam", "ensenso", "discovery"};
 
-    EnsensoDiscovery(viam::sdk::Dependencies dependencies, ResourceConfig configuration)
-        : Discovery(configuration.name()) {
+    EnsensoDiscovery(viam::sdk::Dependencies dependencies, ResourceConfig configuration) : Discovery(configuration.name()) {
         // Get shared nxLib context (initializes nxLib if needed)
         try {
             nxlib_context_ = NxLibContext::get_instance(false);
@@ -115,35 +114,31 @@ public:
                     std::string config_name = "ensenso-" + serial;
 
                     // Create ResourceConfig
-                    viam::sdk::ResourceConfig config(
-                        "camera",                       // API type
-                        config_name,                    // Name
-                        "viam",                         // Namespace
-                        attributes,                     // Attributes
-                        "rdk:component:camera",         // API string
-                        viam::sdk::Model{"viam", "camera", "ensenso"},  // Model
-                        viam::sdk::LinkConfig{},        // Link config
-                        viam::sdk::log_level::info      // Log level
+                    viam::sdk::ResourceConfig config("camera",                                       // API type
+                                                     config_name,                                    // Name
+                                                     "viam",                                         // Namespace
+                                                     attributes,                                     // Attributes
+                                                     "rdk:component:camera",                         // API string
+                                                     viam::sdk::Model{"viam", "camera", "ensenso"},  // Model
+                                                     viam::sdk::LinkConfig{},                        // Link config
+                                                     viam::sdk::log_level::info                      // Log level
                     );
 
                     configs.push_back(config);
 
-                    VIAM_SDK_LOG(info) << "[discover_resources] Discovered: " << model_name
-                                      << " (S/N: " << serial << ", Type: " << camera_type << ")";
+                    VIAM_SDK_LOG(info) << "[discover_resources] Discovered: " << model_name << " (S/N: " << serial
+                                       << ", Type: " << camera_type << ")";
 
                 } catch (const NxLibException& ex) {
-                    VIAM_SDK_LOG(warn) << "[discover_resources] Error processing camera: "
-                                       << ex.getErrorText();
+                    VIAM_SDK_LOG(warn) << "[discover_resources] Error processing camera: " << ex.getErrorText();
                     continue;
                 }
             }
 
-            VIAM_SDK_LOG(info) << "[discover_resources] Discovery complete. Found "
-                              << configs.size() << " camera(s)";
+            VIAM_SDK_LOG(info) << "[discover_resources] Discovery complete. Found " << configs.size() << " camera(s)";
 
         } catch (const NxLibException& ex) {
-            VIAM_SDK_LOG(error) << "[discover_resources] NxLib error during discovery: "
-                               << ex.getErrorText();
+            VIAM_SDK_LOG(error) << "[discover_resources] NxLib error during discovery: " << ex.getErrorText();
         } catch (const std::exception& ex) {
             VIAM_SDK_LOG(error) << "[discover_resources] Error during discovery: " << ex.what();
         }
@@ -164,7 +159,7 @@ public:
         // nxLib context will be finalized when last reference is released
     }
 
-private:
+   private:
     std::shared_ptr<NxLibContext> nxlib_context_;
 };
 
