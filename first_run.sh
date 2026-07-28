@@ -23,4 +23,4 @@ EOF
 fi
 
 export ENSENSO_SDK_URL
-exec "$(dirname "$0")/bin/install-ensenso-sdk.sh"
+exec "$(dirname "$0")/install-ensenso-sdk.sh"

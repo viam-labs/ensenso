@@ -87,7 +87,7 @@ if(BUILD_VIAM_MODULE)
 
     # Installation (to root for Conan deploy)
     install(TARGETS ${PROJECT_NAME} DESTINATION .)
-    install(FILES etc/meta.json DESTINATION .)
+    install(FILES meta.json DESTINATION .)
 endif()
 
 # Test executable (optional - for testing SDK integration)
