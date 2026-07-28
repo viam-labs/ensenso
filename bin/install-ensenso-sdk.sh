@@ -44,6 +44,21 @@ case "${ID:-},${VERSION_ID:-}" in
         ;;
 esac
 
+ARCH="$(dpkg --print-architecture)"
+case "$ARCH" in
+    amd64) ARCH_MARKER="x64" ;;
+    arm64) ARCH_MARKER="arm64" ;;
+    *)
+        echo "install-ensenso-sdk.sh: unsupported architecture $ARCH" >&2
+        exit 1
+        ;;
+esac
+
+if [[ "$ENSENSO_SDK_URL" != *"$ARCH_MARKER"* ]]; then
+    echo "install-ensenso-sdk.sh: ENSENSO_SDK_URL doesn't match host architecture $ARCH (expected '$ARCH_MARKER' in URL): $ENSENSO_SDK_URL" >&2
+    exit 1
+fi
+
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT
 ENSENSO_DEB="${WORKDIR}/ensenso-sdk.deb"
