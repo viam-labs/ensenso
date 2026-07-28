@@ -53,7 +53,8 @@ module.tar.gz: build
 	@echo "Creating module.tar.gz..."
 	tar czf module.tar.gz \
 		-C $(BIN_DIR) $(BINARY) \
-		-C $(shell pwd)/etc meta.json
+		-C $(shell pwd) meta.json first_run.sh \
+		-C $(shell pwd)/bin install-ensenso-sdk.sh
 	@echo "Created module.tar.gz"
 
 # Build and run the Ensenso SDK integration test
