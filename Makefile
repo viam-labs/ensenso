@@ -6,9 +6,16 @@ BINARY := viam-camera-ensenso
 
 export CONAN_FLAGS := -s:a build_type=Release -s:a compiler.cppstd=17
 
-.PHONY: setup build conan-build test-sdk check-sdk clean
+.PHONY: setup build conan-build test-sdk check-sdk clean lint
 
 default: module.tar.gz
+
+lint:
+ifeq ($(OS),Windows_NT)
+	@echo lint unsupported on windows
+else
+	./bin/run-clang-format.sh
+endif
 
 # Verify Ensenso SDK is installed
 check-sdk:
