@@ -37,7 +37,7 @@ class ViamEnsenso(ConanFile):
 
     def requirements(self):
         # Use same Viam SDK version as RealSense (known to work!)
-        self.requires("viam-cpp-sdk/0.31.0")
+        self.requires("viam-cpp-sdk/0.39.0")
         self.requires("stb/cci.20230920")
 
     def layout(self):
