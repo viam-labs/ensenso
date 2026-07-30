@@ -15,7 +15,7 @@ namespace ensenso {
  * Thread-safe singleton pattern for managing nxLib lifecycle.
  */
 class NxLibContext {
-public:
+   public:
     /**
      * @brief Get the singleton instance
      * @param wait_for_cameras If true, waits for initial camera enumeration
@@ -53,7 +53,7 @@ public:
         }
     }
 
-private:
+   private:
     /**
      * @brief Private constructor - use get_instance() instead
      */

@@ -1,13 +1,13 @@
 #include "ensenso_camera.hpp"
 #include "nxlib_context.hpp"
 
+#include <cfloat>
 #include <chrono>
 #include <cmath>
-#include <cfloat>
 #include <cstdint>
 #include <cstring>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 #include <thread>
 #include <vector>
 
@@ -21,11 +21,11 @@ void stb_write_to_vector(void* ctx, void* data, int size) {
     const auto* ptr = static_cast<unsigned char*>(data);
     buf->insert(buf->end(), ptr, ptr + size);
 }
-} // namespace
+}  // namespace
 
 #include <viam/sdk/common/exception.hpp>
-#include <viam/sdk/common/utils.hpp>
 #include <viam/sdk/common/proto_value.hpp>
+#include <viam/sdk/common/utils.hpp>
 
 using viam::sdk::Exception;
 using viam::sdk::ProtoValue;
@@ -50,15 +50,12 @@ EnsensoCamera::EnsensoCamera(const std::string& name, const ProtoStruct& attrs)
       enable_point_cloud_(true),
       point_cloud_stride_(2),
       camera_open_(false) {
-
     VIAM_RESOURCE_LOG(info) << "[constructor] Starting Ensenso camera initialization for resource: " << name;
 
     parse_attributes(attrs);
 
-    VIAM_RESOURCE_LOG(info) << "[constructor] Configuration: serial=" << serial_number_
-                           << ", resolution=" << width_px_ << "x" << height_px_
-                           << ", enable_depth=" << enable_depth_
-                           << ", enable_point_cloud=" << enable_point_cloud_;
+    VIAM_RESOURCE_LOG(info) << "[constructor] Configuration: serial=" << serial_number_ << ", resolution=" << width_px_ << "x" << height_px_
+                            << ", enable_depth=" << enable_depth_ << ", enable_point_cloud=" << enable_point_cloud_;
 
     // Get shared nxLib context — initialize without waiting for camera enumeration
     // (cameras enumerate in the background; open_camera() retries until they appear)
@@ -136,20 +133,19 @@ void EnsensoCamera::open_camera() {
         constexpr int poll_interval_ms = 500;
         NxLibItem cameras = NxLibItem()[itmCameras];
 
-        for (int waited_ms = 0; ; waited_ms += poll_interval_ms) {
+        for (int waited_ms = 0;; waited_ms += poll_interval_ms) {
             cameras = NxLibItem()[itmCameras];
             int count = cameras.count();
 
-            bool found = !serial_number_.empty()
-                ? cameras[serial_number_].exists()
-                : count > 0;
+            bool found = !serial_number_.empty() ? cameras[serial_number_].exists() : count > 0;
 
-            if (found) break;
+            if (found)
+                break;
 
             if (waited_ms >= max_wait_s * 1000) {
                 std::string msg = serial_number_.empty()
-                    ? "No Ensenso cameras found after " + std::to_string(max_wait_s) + "s"
-                    : "Camera '" + serial_number_ + "' not found after " + std::to_string(max_wait_s) + "s";
+                                      ? "No Ensenso cameras found after " + std::to_string(max_wait_s) + "s"
+                                      : "Camera '" + serial_number_ + "' not found after " + std::to_string(max_wait_s) + "s";
                 VIAM_RESOURCE_LOG(error) << "[open_camera] " << msg;
                 throw Exception(msg);
             }
@@ -291,8 +287,7 @@ void EnsensoCamera::capture_images() {
     }
 }
 
-Camera::image_collection EnsensoCamera::get_images(std::vector<std::string> filter_source_names,
-                                                    const ProtoStruct& extra) {
+Camera::image_collection EnsensoCamera::get_images(std::vector<std::string> filter_source_names, const ProtoStruct& extra) {
     std::lock_guard<std::mutex> lock(camera_mutex_);
     VIAM_RESOURCE_LOG(info) << "[get_images] Called with " << filter_source_names.size() << " filter names";
     for (const auto& name : filter_source_names) {
@@ -309,7 +304,7 @@ Camera::image_collection EnsensoCamera::get_images(std::vector<std::string> filt
     VIAM_RESOURCE_LOG(debug) << "[get_images] return_all=" << return_all;
 
     // Add color/rectified image
-    if (return_all ||  std::find(filter_source_names.begin(), filter_source_names.end(), "color") != filter_source_names.end()) {
+    if (return_all || std::find(filter_source_names.begin(), filter_source_names.end(), "color") != filter_source_names.end()) {
         VIAM_RESOURCE_LOG(debug) << "[get_images] Attempting to get color image";
         try {
             Camera::raw_image color_img = get_color_image("");
@@ -322,7 +317,8 @@ Camera::image_collection EnsensoCamera::get_images(std::vector<std::string> filt
     }
 
     // Add depth image if enabled
-    if (enable_depth_ && (return_all || std::find(filter_source_names.begin(), filter_source_names.end(), "depth") != filter_source_names.end())) {
+    if (enable_depth_ &&
+        (return_all || std::find(filter_source_names.begin(), filter_source_names.end(), "depth") != filter_source_names.end())) {
         VIAM_RESOURCE_LOG(debug) << "[get_images] Attempting to get depth image (enabled=" << enable_depth_ << ")";
         try {
             compute_point_cloud();  // Need to compute disparity map first
@@ -365,8 +361,7 @@ Camera::raw_image EnsensoCamera::get_color_image(const std::string& mime_type) {
         }
 
         if (!leftImg.exists()) {
-            VIAM_RESOURCE_LOG(error) << "[get_color_image] No image found. Images node JSON: "
-                                     << camera_node_[itmImages].asJson(true);
+            VIAM_RESOURCE_LOG(error) << "[get_color_image] No image found. Images node JSON: " << camera_node_[itmImages].asJson(true);
             throw Exception("Image not available");
         }
 
@@ -374,10 +369,8 @@ Camera::raw_image EnsensoCamera::get_color_image(const std::string& mime_type) {
         double timestamp;
         leftImg.getBinaryDataInfo(&width, &height, &channels, &bytesPerElement, nullptr, &timestamp);
 
-        VIAM_RESOURCE_LOG(debug) << "[get_color_image] Image info: "
-                                << width << "x" << height
-                                << ", channels=" << channels
-                                << ", bpe=" << bytesPerElement;
+        VIAM_RESOURCE_LOG(debug) << "[get_color_image] Image info: " << width << "x" << height << ", channels=" << channels
+                                 << ", bpe=" << bytesPerElement;
 
         std::vector<unsigned char> raw;
         leftImg.getBinaryData(raw, nullptr);
@@ -393,14 +386,12 @@ Camera::raw_image EnsensoCamera::get_color_image(const std::string& mime_type) {
         } else {
             // Unexpected format: return raw with a descriptive mime type so the
             // caller at least gets data and can diagnose
-            VIAM_RESOURCE_LOG(warn) << "[get_color_image] Unexpected bpe=" << bytesPerElement
-                                    << ", returning raw bytes";
+            VIAM_RESOURCE_LOG(warn) << "[get_color_image] Unexpected bpe=" << bytesPerElement << ", returning raw bytes";
             result.mime_type = "image/jpeg";
             result.bytes = std::move(raw);
         }
 
-        VIAM_RESOURCE_LOG(info) << "[get_color_image] Successfully created color image ("
-                                << result.bytes.size() << " bytes)";
+        VIAM_RESOURCE_LOG(info) << "[get_color_image] Successfully created color image (" << result.bytes.size() << " bytes)";
         return result;
 
     } catch (const NxLibException& ex) {
@@ -424,10 +415,8 @@ Camera::raw_image EnsensoCamera::get_depth_image(const std::string& mime_type) {
         int width, height, channels, bytesPerElement;
         disparityMap.getBinaryDataInfo(&width, &height, &channels, &bytesPerElement, nullptr, nullptr);
 
-        VIAM_RESOURCE_LOG(debug) << "[get_depth_image] Disparity map info: "
-                                << width << "x" << height
-                                << ", channels=" << channels
-                                << ", bpe=" << bytesPerElement;
+        VIAM_RESOURCE_LOG(debug) << "[get_depth_image] Disparity map info: " << width << "x" << height << ", channels=" << channels
+                                 << ", bpe=" << bytesPerElement;
 
         std::vector<unsigned char> raw;
         disparityMap.getBinaryData(raw, nullptr);
@@ -463,9 +452,7 @@ Camera::raw_image EnsensoCamera::get_depth_image(const std::string& mime_type) {
             }
             float range = (max_val > min_val) ? (max_val - min_val) : 1.0f;
             for (int i = 0; i < num_pixels; i++) {
-                gray[i] = (std::isnan(src[i]) || src[i] <= 0.0f)
-                    ? 0
-                    : static_cast<unsigned char>(255.0f * (src[i] - min_val) / range);
+                gray[i] = (std::isnan(src[i]) || src[i] <= 0.0f) ? 0 : static_cast<unsigned char>(255.0f * (src[i] - min_val) / range);
             }
         } else {
             VIAM_RESOURCE_LOG(warn) << "[get_depth_image] Unexpected bpe=" << bytesPerElement;
@@ -478,8 +465,7 @@ Camera::raw_image EnsensoCamera::get_depth_image(const std::string& mime_type) {
         result.mime_type = "image/jpeg";
         result.bytes = std::move(jpeg);
 
-        VIAM_RESOURCE_LOG(info) << "[get_depth_image] Successfully created depth image ("
-                                << result.bytes.size() << " bytes)";
+        VIAM_RESOURCE_LOG(info) << "[get_depth_image] Successfully created depth image (" << result.bytes.size() << " bytes)";
         return result;
 
     } catch (const NxLibException& ex) {
@@ -554,12 +540,9 @@ Camera::point_cloud EnsensoCamera::get_point_cloud(std::string mime_type, const 
         int width, height, channels, bytesPerElement;
         std::vector<float> buffer;
 
-        pointMap.getBinaryDataInfo(&width, &height, &channels,
-                                   &bytesPerElement, nullptr, nullptr);
+        pointMap.getBinaryDataInfo(&width, &height, &channels, &bytesPerElement, nullptr, nullptr);
 
-        VIAM_RESOURCE_LOG(info) << "[get_point_cloud] Point map: "
-                                << width << "x" << height
-                                << " channels=" << channels
+        VIAM_RESOURCE_LOG(info) << "[get_point_cloud] Point map: " << width << "x" << height << " channels=" << channels
                                 << " bpe=" << bytesPerElement;
 
         pointMap.getBinaryData(buffer, nullptr);
@@ -608,38 +591,37 @@ Camera::point_cloud EnsensoCamera::get_point_cloud(std::string mime_type, const 
 
         for (int row = 0; row < height; row += point_cloud_stride_) {
             for (int col = 0; col < width; col += point_cloud_stride_) {
-        int pi = row * width + col;
-            size_t i = static_cast<size_t>(pi) * 3;
-            if (i + 2 >= buffer.size()) break;
-            float x = buffer[i], y = buffer[i + 1], z = buffer[i + 2];
-            if (std::isnan(x) || std::isnan(y) || std::isnan(z)) {
-                invalid_points++;
-                continue;
-            }
-            valid_points_data.push_back(x / 1000.0f);
-            valid_points_data.push_back(y / 1000.0f);
-            valid_points_data.push_back(z / 1000.0f);
-
-            if (has_texture) {
-                // Texture is BGRA (4 channels) or RGB/BGR (3 channels) at 8-bit
-                size_t tex_idx = static_cast<size_t>(pi) * tex_channels;
-                uint8_t r = 0, g = 0, b = 0;
-                if (tex_channels >= 3 && tex_idx + 2 < texture_data.size()) {
-                    // nxLib stores rectified texture as RGBA
-                    r = texture_data[tex_idx];
-                    g = texture_data[tex_idx + 1];
-                    b = texture_data[tex_idx + 2];
-                } else if (tex_channels == 1 && tex_idx < texture_data.size()) {
-                    r = g = b = texture_data[tex_idx];
+                int pi = row * width + col;
+                size_t i = static_cast<size_t>(pi) * 3;
+                if (i + 2 >= buffer.size())
+                    break;
+                float x = buffer[i], y = buffer[i + 1], z = buffer[i + 2];
+                if (std::isnan(x) || std::isnan(y) || std::isnan(z)) {
+                    invalid_points++;
+                    continue;
                 }
-                uint32_t rgb_packed = (static_cast<uint32_t>(r) << 16)
-                                    | (static_cast<uint32_t>(g) << 8)
-                                    | static_cast<uint32_t>(b);
-                float rgb_float;
-                std::memcpy(&rgb_float, &rgb_packed, sizeof(float));
-                valid_points_data.push_back(rgb_float);
-            }
-        }  // col
+                valid_points_data.push_back(x / 1000.0f);
+                valid_points_data.push_back(y / 1000.0f);
+                valid_points_data.push_back(z / 1000.0f);
+
+                if (has_texture) {
+                    // Texture is BGRA (4 channels) or RGB/BGR (3 channels) at 8-bit
+                    size_t tex_idx = static_cast<size_t>(pi) * tex_channels;
+                    uint8_t r = 0, g = 0, b = 0;
+                    if (tex_channels >= 3 && tex_idx + 2 < texture_data.size()) {
+                        // nxLib stores rectified texture as RGBA
+                        r = texture_data[tex_idx];
+                        g = texture_data[tex_idx + 1];
+                        b = texture_data[tex_idx + 2];
+                    } else if (tex_channels == 1 && tex_idx < texture_data.size()) {
+                        r = g = b = texture_data[tex_idx];
+                    }
+                    uint32_t rgb_packed = (static_cast<uint32_t>(r) << 16) | (static_cast<uint32_t>(g) << 8) | static_cast<uint32_t>(b);
+                    float rgb_float;
+                    std::memcpy(&rgb_float, &rgb_packed, sizeof(float));
+                    valid_points_data.push_back(rgb_float);
+                }
+            }  // col
         }  // row
 
         int valid_points = static_cast<int>(valid_points_data.size() / floats_per_point);
@@ -708,10 +690,8 @@ Camera::properties EnsensoCamera::get_properties() {
     props.intrinsic_parameters.center_x_px = cx;
     props.intrinsic_parameters.center_y_px = cy;
 
-    VIAM_RESOURCE_LOG(info) << "[get_properties] fx=" << fx << " fy=" << fy
-                            << " cx=" << cx << " cy=" << cy
-                            << " " << width_px_ << "x" << height_px_
-                            << " supports_pcd=" << props.supports_pcd;
+    VIAM_RESOURCE_LOG(info) << "[get_properties] fx=" << fx << " fy=" << fy << " cx=" << cx << " cy=" << cy << " " << width_px_ << "x"
+                            << height_px_ << " supports_pcd=" << props.supports_pcd;
     return props;
 }
 
@@ -744,9 +724,7 @@ ProtoStruct EnsensoCamera::do_command(const ProtoStruct& command) {
 }
 
 // Factory function
-std::shared_ptr<Camera> create_ensenso_camera(
-    const std::string& name,
-    const ProtoStruct& attrs) {
+std::shared_ptr<Camera> create_ensenso_camera(const std::string& name, const ProtoStruct& attrs) {
     return std::make_shared<EnsensoCamera>(name, attrs);
 }
 

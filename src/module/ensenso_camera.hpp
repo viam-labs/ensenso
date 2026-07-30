@@ -14,8 +14,8 @@
 
 // Use Viam SDK namespace types
 using viam::sdk::Camera;
-using viam::sdk::ProtoStruct;
 using viam::sdk::GeometryConfig;
+using viam::sdk::ProtoStruct;
 
 namespace viam {
 namespace camera {
@@ -32,7 +32,7 @@ class NxLibContext;
  * Ensenso 3D cameras.
  */
 class EnsensoCamera : public Camera {
-public:
+   public:
     /**
      * @brief Construct a new Ensenso Camera object
      *
@@ -55,8 +55,7 @@ public:
      * @param extra Additional parameters
      * @return image_collection Collection of named images (color, depth, etc.)
      */
-    Camera::image_collection get_images(std::vector<std::string> filter_source_names,
-                                        const ProtoStruct& extra) override;
+    Camera::image_collection get_images(std::vector<std::string> filter_source_names, const ProtoStruct& extra) override;
 
     /**
      * @brief Get point cloud data
@@ -97,7 +96,7 @@ public:
      */
     ProtoStruct do_command(const ProtoStruct& command) override;
 
-private:
+   private:
     // Configuration attributes
     std::string serial_number_;
     std::string camera_type_;   // "Stereo" or "Monocular"
@@ -127,10 +126,7 @@ private:
 /**
  * @brief Factory function to create EnsensoCamera instances
  */
-std::shared_ptr<Camera> create_ensenso_camera(
-    const std::string& name,
-    const ProtoStruct& attrs
-);
+std::shared_ptr<Camera> create_ensenso_camera(const std::string& name, const ProtoStruct& attrs);
 
 }  // namespace ensenso
 }  // namespace camera
