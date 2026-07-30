@@ -681,7 +681,7 @@ Camera::properties EnsensoCamera::get_properties() {
     // On-demand capture; no fixed frame rate.
     props.frame_rate = 0.f;
 
-    // K matrix in NxLib is column-major: cx=[2][0], cy=[2][1], not [0][2]/[1][2].
+    // NxLib K matrix is column-major.
     NxLibItem calib = camera_node_[itmCalibration][itmStereo][itmLeft];
     double fx = calib[itmCamera][0][0].asDouble();
     double fy = calib[itmCamera][1][1].asDouble();
