@@ -681,18 +681,12 @@ Camera::properties EnsensoCamera::get_properties() {
     // On-demand capture; no fixed frame rate.
     props.frame_rate = 0.f;
 
-    // itmStereo path — itmMonocular exists but returns 0 for cx/cy on stereo cameras.
+    // K matrix in NxLib is column-major: cx=[2][0], cy=[2][1], not [0][2]/[1][2].
     NxLibItem calib = camera_node_[itmCalibration][itmStereo][itmLeft];
     double fx = calib[itmCamera][0][0].asDouble();
     double fy = calib[itmCamera][1][1].asDouble();
-    double cx = calib[itmCamera][0][2].asDouble();
-    double cy = calib[itmCamera][1][2].asDouble();
-    if (cx <= 0.0 || cy <= 0.0) {
-        VIAM_RESOURCE_LOG(error) << "[get_properties] full calibration node: "
-                                 << camera_node_[itmCalibration].asJson(true);
-        throw Exception("principal point not populated in stereo calibration (cx=" +
-                        std::to_string(cx) + ", cy=" + std::to_string(cy) + ")");
-    }
+    double cx = calib[itmCamera][2][0].asDouble();
+    double cy = calib[itmCamera][2][1].asDouble();
 
     props.intrinsic_parameters.focal_x_px = fx;
     props.intrinsic_parameters.focal_y_px = fy;
