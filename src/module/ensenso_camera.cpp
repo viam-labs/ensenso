@@ -681,14 +681,16 @@ Camera::properties EnsensoCamera::get_properties() {
     // On-demand capture; no fixed frame rate.
     props.frame_rate = 0.f;
 
-    // Let NxLibException propagate on failure. A silent fallback to zero
-    // intrinsics would cause downstream consumers (motion, vision, cartographer)
-    // to divide by zero and produce garbage.
-    NxLibItem calib = camera_node_[itmCalibration][itmMonocular][itmLeft];
+    // itmStereo path — itmMonocular exists but returns 0 for cx/cy on stereo cameras.
+    NxLibItem calib = camera_node_[itmCalibration][itmStereo][itmLeft];
     double fx = calib[itmCamera][0][0].asDouble();
     double fy = calib[itmCamera][1][1].asDouble();
     double cx = calib[itmCamera][0][2].asDouble();
     double cy = calib[itmCamera][1][2].asDouble();
+    if (cx <= 0.0 || cy <= 0.0) {
+        throw Exception("principal point not populated in stereo calibration (cx=" +
+                        std::to_string(cx) + ", cy=" + std::to_string(cy) + ")");
+    }
 
     props.intrinsic_parameters.focal_x_px = fx;
     props.intrinsic_parameters.focal_y_px = fy;
