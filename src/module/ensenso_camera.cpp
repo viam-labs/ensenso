@@ -181,13 +181,18 @@ void EnsensoCamera::open_camera() {
         camera_open_ = true;
         VIAM_RESOURCE_LOG(info) << "[open_camera] Camera opened successfully: " << serial_number_;
 
-        // Configure capture parameters for better image quality
+        // Configure capture parameters. Manual exposure + explicit projector on
+        // so the active-stereo pattern is actually visible in the stereo pair.
         VIAM_RESOURCE_LOG(debug) << "[open_camera] Configuring capture parameters";
         try {
             camera_node_[itmParameters][itmCapture][itmAutoBlackLevel] = true;
-            camera_node_[itmParameters][itmCapture][itmAutoGain] = true;
-            camera_node_[itmParameters][itmCapture][itmAutoExposure] = true;
-            VIAM_RESOURCE_LOG(info) << "[open_camera] Capture parameters configured (auto black level, gain, exposure)";
+            camera_node_[itmParameters][itmCapture][itmAutoGain] = false;
+            camera_node_[itmParameters][itmCapture][itmAutoExposure] = false;
+            camera_node_[itmParameters][itmCapture][itmExposure] = 8.0;
+            camera_node_[itmParameters][itmCapture][itmGain] = 4.0;
+            camera_node_[itmParameters][itmCapture][itmProjector] = true;
+            camera_node_[itmParameters][itmCapture][itmFrontLight] = false;
+            VIAM_RESOURCE_LOG(info) << "[open_camera] Capture parameters set: exposure=8ms gain=4 projector=on frontlight=off";
         } catch (const NxLibException& ex) {
             VIAM_RESOURCE_LOG(warn) << "[open_camera] Some capture parameters not supported: " << ex.getErrorText();
         }
