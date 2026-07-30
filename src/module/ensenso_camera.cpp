@@ -688,6 +688,8 @@ Camera::properties EnsensoCamera::get_properties() {
     double cx = calib[itmCamera][0][2].asDouble();
     double cy = calib[itmCamera][1][2].asDouble();
     if (cx <= 0.0 || cy <= 0.0) {
+        VIAM_RESOURCE_LOG(error) << "[get_properties] full calibration node: "
+                                 << camera_node_[itmCalibration].asJson(true);
         throw Exception("principal point not populated in stereo calibration (cx=" +
                         std::to_string(cx) + ", cy=" + std::to_string(cy) + ")");
     }
