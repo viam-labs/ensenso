@@ -39,7 +39,8 @@ setup: check-sdk
 
 # Install Viam SDK via Conan and compile
 build:
-	test -f ./venv/bin/activate && . ./venv/bin/activate; \
+	@test -f ./venv/bin/activate || $(MAKE) setup
+	. ./venv/bin/activate; \
 	conan install . \
 		--output-folder=$(CONAN_OUTPUT) \
 		--build=missing \
