@@ -693,6 +693,10 @@ Camera::properties EnsensoCamera::get_properties() {
     props.intrinsic_parameters.center_x_px = cx;
     props.intrinsic_parameters.center_y_px = cy;
 
+    // NxLib rectifies the image; the served image has no distortion left.
+    props.distortion_parameters.model = "brown_conrady";
+    props.distortion_parameters.parameters = std::vector<double>{0.0, 0.0, 0.0, 0.0, 0.0};
+
     VIAM_RESOURCE_LOG(info) << "[get_properties] fx=" << fx << " fy=" << fy << " cx=" << cx << " cy=" << cy << " " << width_px_ << "x"
                             << height_px_ << " supports_pcd=" << props.supports_pcd;
     return props;
