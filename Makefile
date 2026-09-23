@@ -4,7 +4,7 @@ CMAKE_BUILD_DIR := $(CONAN_OUTPUT)/build/Release
 BIN_DIR := bin
 BINARY := viam-camera-ensenso
 
-export CONAN_FLAGS := -s:a build_type=Release -s:a compiler.cppstd=17
+export CONAN_FLAGS := -s:a build_type=Release -s:a compiler.cppstd=17 -pr:a bin/cppstd17.profile
 
 .PHONY: setup install-sdk build conan-build test-sdk check-sdk clean lint
 
@@ -52,6 +52,8 @@ build:
 		--output-folder=$(CONAN_OUTPUT) \
 		--build=missing \
 		--build="b2/*" \
+		--build="abseil/*" \
+		--build="re2/*" \
 		$(CONAN_FLAGS)
 	test -f ./venv/bin/activate && . ./venv/bin/activate; \
 	cmake --preset conan-release
@@ -80,6 +82,8 @@ test-sdk:
 		--output-folder=$(CONAN_OUTPUT) \
 		--build=missing \
 		--build="b2/*" \
+		--build="abseil/*" \
+		--build="re2/*" \
 		$(CONAN_FLAGS)
 	test -f ./venv/bin/activate && . ./venv/bin/activate; \
 	cmake --preset conan-release
