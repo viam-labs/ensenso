@@ -6,7 +6,7 @@ BINARY := viam-camera-ensenso
 
 export CONAN_FLAGS := -s:a build_type=Release -s:a compiler.cppstd=17
 
-.PHONY: setup build conan-build test-sdk check-sdk clean lint
+.PHONY: setup install-sdk build conan-build test-sdk check-sdk clean lint
 
 default: module.tar.gz
 
@@ -33,9 +33,16 @@ check-sdk:
 	@echo "  libNxLib64.so found"
 	@echo "Ensenso SDK OK"
 
-# Install system dependencies, create venv, install conan (run once)
-setup: check-sdk
+# Install system dependencies, create venv, install conan (run once). The SDK
+# installer is a no-op when /opt/ensenso is already present.
+ENSENSO_SDK_URL ?= https://download.optonic.com/s/ensensosdk/download?files=ensenso-sdk-4.3.1057-x64.deb
+export ENSENSO_SDK_URL
+
+setup: install-sdk check-sdk
 	bin/setup.sh
+
+install-sdk:
+	bin/install-ensenso-sdk.sh
 
 # Install Viam SDK via Conan and compile
 build:
