@@ -83,6 +83,8 @@ if(BUILD_VIAM_MODULE)
             ${ENSENSO_LIBRARY}
             ${CMAKE_DL_LIBS}
             stb::stb
+            # The SDK's rust utils call lio_listio; before glibc 2.34 that lives in librt.
+            $<$<PLATFORM_ID:Linux>:rt>
     )
 
     # Installation (to root for Conan deploy)
