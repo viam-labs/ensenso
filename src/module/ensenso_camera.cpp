@@ -730,6 +730,13 @@ ProtoStruct EnsensoCamera::do_command(const ProtoStruct& command) {
     return result;
 }
 
+ProtoStruct EnsensoCamera::get_status() {
+    ProtoStruct status;
+    status.emplace("camera_open", ProtoValue(camera_open_));
+    status.emplace("serial_number", ProtoValue(serial_number_));
+    return status;
+}
+
 // Factory function
 std::shared_ptr<Camera> create_ensenso_camera(const std::string& name, const ProtoStruct& attrs) {
     return std::make_shared<EnsensoCamera>(name, attrs);
