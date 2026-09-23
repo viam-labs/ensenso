@@ -51,6 +51,7 @@ build:
 	conan install . \
 		--output-folder=$(CONAN_OUTPUT) \
 		--build=missing \
+		--build="b2/*" \
 		$(CONAN_FLAGS)
 	test -f ./venv/bin/activate && . ./venv/bin/activate; \
 	cmake --preset conan-release
@@ -78,6 +79,7 @@ test-sdk:
 	conan install . \
 		--output-folder=$(CONAN_OUTPUT) \
 		--build=missing \
+		--build="b2/*" \
 		$(CONAN_FLAGS)
 	test -f ./venv/bin/activate && . ./venv/bin/activate; \
 	cmake --preset conan-release
