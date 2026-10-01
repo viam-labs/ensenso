@@ -155,6 +155,15 @@ class EnsensoDiscovery : public Discovery {
         return result;
     }
 
+    /**
+     * @brief Get the status of the discovery service
+     */
+    viam::sdk::ProtoStruct get_status() override {
+        viam::sdk::ProtoStruct status;
+        status["initialized"] = nxlib_context_ && nxlib_context_->is_initialized();
+        return status;
+    }
+
     ~EnsensoDiscovery() override {
         // nxLib context will be finalized when last reference is released
     }

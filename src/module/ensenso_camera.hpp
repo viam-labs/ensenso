@@ -96,6 +96,13 @@ class EnsensoCamera : public Camera {
      */
     ProtoStruct do_command(const ProtoStruct& command) override;
 
+    /**
+     * @brief Get the status of the camera
+     *
+     * @return ProtoStruct Status data
+     */
+    ProtoStruct get_status() override;
+
    private:
     // Configuration attributes
     std::string serial_number_;
