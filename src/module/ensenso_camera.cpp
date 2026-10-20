@@ -731,10 +731,7 @@ ProtoStruct EnsensoCamera::do_command(const ProtoStruct& command) {
 }
 
 ProtoStruct EnsensoCamera::get_status() {
-    ProtoStruct status;
-    status.emplace("camera_open", ProtoValue(camera_open_));
-    status.emplace("serial_number", ProtoValue(serial_number_));
-    return status;
+    return {};
 }
 
 // Factory function
